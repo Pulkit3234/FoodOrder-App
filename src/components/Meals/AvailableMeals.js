@@ -8,22 +8,34 @@ const DUMMY_MEALS = [];
 
 const AvailableMeals = () => {
 	const [meals, setMeals] = useState([]);
-	const [loading, setLoading] = useState([]);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState(false);
 	useEffect(() => {
 		const fetchMeals = async () => {
-			const { data } = await axios.get('https://newthis-be766-default-rtdb.firebaseio.com/meals.json');
-			console.log(data);
-			const mealsData = [];
-			for (const key in data) {
-				console.log(key);
-				mealsData.push({
-					id: key,
-					name: data[key].name,
-					description: data[key].description,
-					price: data[key].price,
-				});
+			try {
+				const { data } = await axios.get('https://newthis-be766-default-rtdb.firebaseio.com/meals.json');
+				console.log(data);
+				if (!data) {
+					throw new Error('error');
+				}
+				const mealsData = [];
+				for (const key in data) {
+					console.log(key);
+					mealsData.push({
+						id: key,
+						name: data[key].name,
+						description: data[key].description,
+						price: data[key].price,
+					});
+				}
+
+				setMeals(mealsData);
+				setLoading(false);
+			} catch (error) {
+				console.log('error');
+				setLoading(false);
+				setError(true);
 			}
-			setMeals(mealsData);
 		};
 
 		fetchMeals();
@@ -40,6 +52,8 @@ const AvailableMeals = () => {
 	return (
 		<section>
 			<Card>
+				{loading && !error && <p style={{ textAlign: 'center' }}>Loading...</p>}
+				{error && <p style={{ textAlign: 'center', color: 'red' }}>Something Went Wrong</p>}
 				<ul>{mealsList}</ul>
 			</Card>
 		</section>
